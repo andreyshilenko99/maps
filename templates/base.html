@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+{% extends 'map1.html' %}
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-6 mx-auto" style="margin: -800px 51px -1000px 900px">
+                {% csrf_token %}
+                <form action="{% url 'get_value' %}" method="get">
+                    <div class="form-group row">
+                        <label for="example-email-input" class="col-2 col-form-label">Широта1</label>
+                        <div class="col-10">
+                            <input name='cord1.1' class="form-control" type="text">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="example-email-input" class="col-2 col-form-label">Долгота1</label>
+                        <div class="col-10">
+                            <input name='cord1.2' class="form-control" type="text">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="example-email-input" class="col-2 col-form-label">Широта2</label>
+                        <div class="col-10">
+                            <input name='cord2.1' class="form-control" type="text">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="example-email-input" class="col-2 col-form-label">Долгота2</label>
+                        <div class="col-10">
+                            <input name='cord2.2' class="form-control" type="text">
+                        </div>
+                    </div>
+                    <div class="pull-left">
+                        <button type="submit" class="btn btn-primary float-right">Submit</button>
+                    </div>
+                </form>
+                <form action="{% url 'reset' %}" method="get">
+                    <div class="pull-right">
+                        <button type="submit" class="btn btn-primary float-right">Reset</button>
+                    </div>
+                </form>
+                <form action="{% url 'intoDb' %}" method="get">
+                    <div class="pull-down">
+                        <button type="submit" class="btn btn-primary float-right">IntoDb</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
