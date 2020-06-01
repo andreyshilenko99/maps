@@ -3,9 +3,12 @@ from django.shortcuts import render
 import folium
 from bs4 import BeautifulSoup
 import math
-import socket
+from socket import *
+
 
 # добавление block и endblock элементов в html с картой
+
+
 def block():
     with open('templates/map1.html') as inf:
         txt = inf.read()
@@ -89,7 +92,7 @@ def intoDb(request):
             cur.execute(
                 "INSERT INTO cooords (long1,width1,long2,width2,total) VALUES (%s,%s,%s,%s,%s)",
                 (float(lst[0]), float(lst[1]), float(lst[2]),
-                float(lst[3]), lst[4])
+                 float(lst[3]), lst[4])
             )
         except ValueError:
             return render(request, 'base.html')
@@ -99,7 +102,12 @@ def intoDb(request):
 
         con.close()
         lst.clear()
-        return render(request, 'base.html')
+        return render(request, 'base.html',
+                      {'cord1': getLastFromDb()[0],
+                       'cord2': getLastFromDb()[1],
+                       'cord3': getLastFromDb()[2],
+                       'cord4': getLastFromDb()[3],
+                       'cord5': getLastFromDb()[4]})
     except IndexError:
         return render(request, 'base.html')
 
@@ -108,7 +116,7 @@ lst = []  # список в котором временно хранятся к�
 
 
 #  получение значений которые были введены в текстбоксы
-def get_value(request):
+def getValue(request):
     try:
         if lst:
             lst.clear()
@@ -120,29 +128,46 @@ def get_value(request):
         lst.append(way(float(lst[0]), float(lst[1]), float(lst[2]), float(lst[3])))
         marker(lst[0], lst[1], lst[2], lst[3])
         return render(request, 'base.html',
-                      {'cord1_1': lst[0], 'cord1_2': lst[1], 'cord2_1': lst[2], 'cord2_2': lst[3], 'long': lst[4]})
+                      {'cord1_1': lst[0],
+                       'cord1_2': lst[1],
+                       'cord2_1': lst[2],
+                       'cord2_2': lst[3],
+                       'long': lst[4]})
     except ValueError:
         return render(request, 'base.html')
 
 
+# #запуск сервера
 def run(request):
-    # Задаем адрес сервера
-    SERVER_ADDRESS = ('localhost', 8686)
+    addr = ('localhost', 7777)
+    tcp_socket = socket(AF_INET, SOCK_STREAM)
+    tcp_socket.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
+    # bind - связывает адрес и порт с сокетом
+    tcp_socket.bind(addr)
+    # listen - запускает прием TCP
+    tcp_socket.listen(1)
 
-    # Настраиваем сокет
-    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server_socket.bind(SERVER_ADDRESS)
-    server_socket.listen(10)
-    print('server is running, please, press ctrl+c to stop')
-
-    # Слушаем запросы
+    # Бесконечный цикл работы программы
     while True:
-        connection, address = server_socket.accept()
-        print("new connection from {address}".format(address=address))
+        getLastFromDb()
+        conn, addr = tcp_socket.accept()
+        print('client addr: ', addr)
+        conn.send(bytes(str.encode(str(getLastFromDb()[0]))))
+        conn.send(bytes(str.encode(str(getLastFromDb()[1]))))
+        conn.send(bytes(str.encode(str(getLastFromDb()[2]))))
+        conn.send(bytes(str.encode(str(getLastFromDb()[3]))))
+        conn.send(bytes(str.encode(str(getLastFromDb()[4]))))
 
-        data = connection.recv(1024)
-        print(str(data))
 
-        connection.send(bytes('Hello from server!', encoding='UTF-8'))
-
-        connection.close()
+def getLastFromDb():
+    con = psycopg2.connect(
+        database="django_db",
+        user="user_name",
+        password="12345",
+        host="127.0.0.1",
+        port="5432"
+    )
+    cur = con.cursor()
+    cur.execute("SELECT * from cooords order by id desc")
+    result = cur.fetchone()
+    return result

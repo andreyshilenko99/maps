@@ -5,32 +5,37 @@
         <div class="row">
             <div class="col-sm-6 mx-auto" style="margin: -800px 51px -1000px 900px">
                 {% csrf_token %}
-                <form action="{% url 'get_value' %}" method="post">
+                <form action="{% url 'getValue' %}" method="post">
                     {% csrf_token %}
                     <div class="form-group row">
                         <label for="example-email-input" class="col-2 col-form-label">Широта1</label>
+                        (Last in db {{ cord1 }})
                         <div class="col-10">
                             <input name='cord1.1' class="form-control" type="text" value="{{ cord1_1 }}">
                         </div>
                     </div>
                     <div class="form-group row">
                         <label for="example-email-input" class="col-2 col-form-label">Долгота1</label>
+                        (Last in db {{ cord2 }})
                         <div class="col-10">
                             <input name='cord1.2' class="form-control" type="text" value="{{ cord1_2 }}">
                         </div>
                     </div>
                     <div class="form-group row">
                         <label for="example-email-input" class="col-2 col-form-label">Широта2</label>
+                        (Last in db {{ cord3 }})
                         <div class="col-10">
                             <input name='cord2.1' class="form-control" type="text" value="{{ cord2_1 }}">
                         </div>
                     </div>
                     <div class="form-group row">
                         <label for="example-email-input" class="col-2 col-form-label">Долгота2</label>
+                        (Last in db {{ cord4 }})
                         <div class="col-10">
                             <input name='cord2.2' class="form-control" type="text" value="{{ cord2_2 }}">
                             <label for="example-email-input" class="col-2 col-form-label">Расстояние: {{long}}км </label>
                         </div>
+                         (Last in db {{ cord5 }}km)
                     </div>
                     <div class="pull-left">
                         <button type="submit" class="btn btn-primary float-right">Submit</button>
@@ -45,6 +50,11 @@
                     {% csrf_token %}
                     <div class="pull-down">
                         <button type="submit" class="btn btn-primary float-right">IntoDb</button>
+                    </div>
+                </form>
+                 <form action="{% url 'run' %}" method="get">
+                    <div class="pull-left">
+                        <button type="submit" class="btn btn-primary float-right">TCPconnect</button>
                     </div>
                 </form>
             </div>
