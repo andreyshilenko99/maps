@@ -85,11 +85,14 @@ def intoDb(request):
 
         print("Database opened successfully")
         cur = con.cursor()
-        cur.execute(
-            "INSERT INTO cooords (long1,width1,long2,width2,total) VALUES (%s,%s,%s,%s,%s)",
-            (float(lst[0]), float(lst[1]), float(lst[2]),
-             float(lst[3]), lst[4])
-        )
+        try:
+            cur.execute(
+                "INSERT INTO cooords (long1,width1,long2,width2,total) VALUES (%s,%s,%s,%s,%s)",
+                (float(lst[0]), float(lst[1]), float(lst[2]),
+                float(lst[3]), lst[4])
+            )
+        except ValueError:
+            return render(request, 'base.html')
 
         con.commit()
         print("Record inserted successfully")
@@ -107,8 +110,9 @@ lst = []  # список в котором временно хранятся к�
 #  получение значений которые были введены в текстбоксы
 def get_value(request):
     try:
-        lst.clear()
-        map()
+        if lst:
+            lst.clear()
+            map()
         lst.append(request.POST.get('cord1.1'))
         lst.append(request.POST.get('cord1.2'))
         lst.append(request.POST.get('cord2.1'))
