@@ -4,7 +4,7 @@ import folium
 from bs4 import BeautifulSoup
 import math
 from socket import *
-
+from django.http import HttpResponse
 
 # добавление block и endblock элементов в html с картой
 
@@ -18,7 +18,7 @@ def block():
 
     soup.append(block_cont)
     soup.append(end_cont)
-
+    # запись в html
     with open('templates/map1.html', "w") as outf:
         outf.write(str(soup))
 
@@ -89,6 +89,7 @@ def intoDb(request):
         print("Database opened successfully")
         cur = con.cursor()
         try:
+            # пробуем записать полученные данные в таблицу дб
             cur.execute(
                 "INSERT INTO cooords (long1,width1,long2,width2,total) VALUES (%s,%s,%s,%s,%s)",
                 (float(lst[0]), float(lst[1]), float(lst[2]),
@@ -101,6 +102,7 @@ def intoDb(request):
         print("Record inserted successfully")
 
         con.close()
+        # отчиска временного листа
         lst.clear()
         return render(request, 'base.html',
                       {'cord1': getLastFromDb()[0],
@@ -137,29 +139,8 @@ def getValue(request):
         return render(request, 'base.html')
 
 
-# #запуск сервера
-def run(request):
-    addr = ('localhost', 7777)
-    tcp_socket = socket(AF_INET, SOCK_STREAM)
-    tcp_socket.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
-    # bind - связывает адрес и порт с сокетом
-    tcp_socket.bind(addr)
-    # listen - запускает прием TCP
-    tcp_socket.listen(1)
-
-    # Бесконечный цикл работы программы
-    while True:
-        getLastFromDb()
-        conn, addr = tcp_socket.accept()
-        print('client addr: ', addr)
-        conn.send(bytes(str.encode(str(getLastFromDb()[0]))))
-        conn.send(bytes(str.encode(str(getLastFromDb()[1]))))
-        conn.send(bytes(str.encode(str(getLastFromDb()[2]))))
-        conn.send(bytes(str.encode(str(getLastFromDb()[3]))))
-        conn.send(bytes(str.encode(str(getLastFromDb()[4]))))
-
-
 def getLastFromDb():
+    #подключение к дб
     con = psycopg2.connect(
         database="django_db",
         user="user_name",
@@ -171,3 +152,27 @@ def getLastFromDb():
     cur.execute("SELECT * from cooords order by id desc")
     result = cur.fetchone()
     return result
+
+
+def run(request):
+    try:
+        addr = ('localhost', 7777)
+        tcp_socket = socket(AF_INET, SOCK_STREAM)
+        tcp_socket.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
+    # bind - связывает адрес и порт с сокетом
+        tcp_socket.bind(addr)
+    # listen - запускает прием TCP
+        tcp_socket.listen(1)
+    # Бесконечный цикл работы программы
+        while True:
+            #кидаем последнюю запись
+            getLastFromDb()
+            conn, addr = tcp_socket.accept()
+            conn.send(bytes(str.encode(str(getLastFromDb()[0]))))
+            conn.send(bytes(str.encode(str(getLastFromDb()[1]))))
+            conn.send(bytes(str.encode(str(getLastFromDb()[2]))))
+            conn.send(bytes(str.encode(str(getLastFromDb()[3]))))
+            conn.send(bytes(str.encode(str(getLastFromDb()[4]))))
+            print('client addr: ', addr)
+    except OSError:
+       return render(request, 'base.html')
