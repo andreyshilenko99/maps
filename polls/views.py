@@ -4,7 +4,7 @@ import folium
 from bs4 import BeautifulSoup
 import math
 from socket import *
-from django.http import HttpResponse
+
 
 # добавление block и endblock элементов в html с картой
 
@@ -165,14 +165,18 @@ def run(request):
         tcp_socket.listen(1)
     # Бесконечный цикл работы программы
         while True:
+
             #кидаем последнюю запись
-            getLastFromDb()
             conn, addr = tcp_socket.accept()
-            conn.send(bytes(str.encode(str(getLastFromDb()[0]))))
-            conn.send(bytes(str.encode(str(getLastFromDb()[1]))))
-            conn.send(bytes(str.encode(str(getLastFromDb()[2]))))
-            conn.send(bytes(str.encode(str(getLastFromDb()[3]))))
-            conn.send(bytes(str.encode(str(getLastFromDb()[4]))))
             print('client addr: ', addr)
+            try:
+                getLastFromDb()
+                conn.send(bytes(str.encode(str(getLastFromDb()[0]))))
+                conn.send(bytes(str.encode(str(getLastFromDb()[1]))))
+                conn.send(bytes(str.encode(str(getLastFromDb()[2]))))
+                conn.send(bytes(str.encode(str(getLastFromDb()[3]))))
+                conn.send(bytes(str.encode(str(getLastFromDb()[4]))))
+            except TypeError:
+                return render(request, 'base.html')
     except OSError:
        return render(request, 'base.html')
