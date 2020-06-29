@@ -21,7 +21,7 @@
 <meta content="width=device-width,
                 initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
 <style>
-                #map_0e31be6e23b449fba4a7998342b188bd {
+                #map_99a310c0ad6841b2adc43be6f885792b {
                     position: relative;
                     width: 950.0px;
                     height: 950.0px;
@@ -29,14 +29,34 @@
                     top: 0.0%;
                 }
             </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.2/leaflet.draw.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.2/leaflet.draw.css" rel="stylesheet"/>
+<style>
+                #export {
+                    position: absolute;
+                    top: 5px;
+                    right: 10px;
+                    z-index: 999;
+                    background: white;
+                    color: black;
+                    padding: 6px;
+                    border-radius: 4px;
+                    font-family: 'Helvetica Neue';
+                    cursor: pointer;
+                    font-size: 12px;
+                    text-decoration: none;
+                    top: 90px;
+                }
+            </style>
 </head>
 <body>
-<div class="folium-map" id="map_0e31be6e23b449fba4a7998342b188bd"></div>
+<div class="folium-map" id="map_99a310c0ad6841b2adc43be6f885792b"></div>
+<a href="#" id="export">Export</a>
 </body>
 <script>    
     
-            var map_0e31be6e23b449fba4a7998342b188bd = L.map(
-                "map_0e31be6e23b449fba4a7998342b188bd",
+            var map_99a310c0ad6841b2adc43be6f885792b = L.map(
+                "map_99a310c0ad6841b2adc43be6f885792b",
                 {
                     center: [59.939095, 30.315856],
                     crs: L.CRS.EPSG3857,
@@ -50,9 +70,83 @@
 
         
     
-            var tile_layer_724c84374d5c48338fa0c5967f4e1eb1 = L.tileLayer(
+            var tile_layer_5aad149cd6c34ba096ef558c60195747 = L.tileLayer(
                 "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
                 {"attribution": "Data by \u0026copy; \u003ca href=\"http://openstreetmap.org\"\u003eOpenStreetMap\u003c/a\u003e, under \u003ca href=\"http://www.openstreetmap.org/copyright\"\u003eODbL\u003c/a\u003e.", "detectRetina": false, "maxNativeZoom": 18, "maxZoom": 18, "minZoom": 0, "noWrap": false, "opacity": 1, "subdomains": "abc", "tms": false}
-            ).addTo(map_0e31be6e23b449fba4a7998342b188bd);
+            ).addTo(map_99a310c0ad6841b2adc43be6f885792b);
+        
+    
+        function geo_json_4ada225a672c409d836a097791440df8_onEachFeature(feature, layer) {
+            layer.on({
+                click: function(e) {
+                    map_99a310c0ad6841b2adc43be6f885792b.fitBounds(e.target.getBounds());
+                }
+            });
+        };
+        var geo_json_4ada225a672c409d836a097791440df8 = L.geoJson(null, {
+                onEachFeature: geo_json_4ada225a672c409d836a097791440df8_onEachFeature,
+            
+        }).addTo(map_99a310c0ad6841b2adc43be6f885792b);
+
+        function geo_json_4ada225a672c409d836a097791440df8_add (data) {
+            geo_json_4ada225a672c409d836a097791440df8.addData(data);
+        }
+            geo_json_4ada225a672c409d836a097791440df8_add({"features": [{"geometry": {"coordinates": [30.346298, 60.011687], "type": "Point"}, "properties": {}, "type": "Feature"}], "type": "FeatureCollection"});
+        
+    
+            var options = {
+              position: "topleft",
+              draw: {},
+              edit: {},
+            }
+            // FeatureGroup is to store editable layers.
+            var drawnItems = new L.featureGroup().addTo(
+                map_99a310c0ad6841b2adc43be6f885792b
+            );
+            options.edit.featureGroup = drawnItems;
+            var draw_control_ba4bf1cb336140d5a8ce86fad46f9dc7 = new L.Control.Draw(
+                options
+            ).addTo( map_99a310c0ad6841b2adc43be6f885792b );
+            map_99a310c0ad6841b2adc43be6f885792b.on(L.Draw.Event.CREATED, function(e) {
+                var layer = e.layer,
+                    type = e.layerType;
+                var coords = JSON.stringify(layer.toGeoJSON());
+                layer.on('click', function() {
+                    alert(coords);
+                    console.log(coords);
+                });
+                drawnItems.addLayer(layer);
+             });
+            map_99a310c0ad6841b2adc43be6f885792b.on('draw:created', function(e) {
+                drawnItems.addLayer(e.layer);
+            });
+            
+            document.getElementById('export').onclick = function(e) {
+                var data = drawnItems.toGeoJSON();
+                var convertedData = 'text/json;charset=utf-8,'
+                    + encodeURIComponent(JSON.stringify(data));
+                 $.ajax({
+                    type: "POST",
+                    url: "http://127.0.0.1:8000/export",
+                    dataType: 'json',
+                    data: JSON.stringify(data)
+                });
+            }
+            
+        
+    
+            var layer_control_91e191b72caa4d0fb81cce4b7d0420f4 = {
+                base_layers : {
+                    "openstreetmap" : tile_layer_5aad149cd6c34ba096ef558c60195747,
+                },
+                overlays :  {
+                    "data.geojson" : geo_json_4ada225a672c409d836a097791440df8,
+                },
+            };
+            L.control.layers(
+                layer_control_91e191b72caa4d0fb81cce4b7d0420f4.base_layers,
+                layer_control_91e191b72caa4d0fb81cce4b7d0420f4.overlays,
+                {"autoZIndex": true, "collapsed": true, "position": "topright"}
+            ).addTo(map_99a310c0ad6841b2adc43be6f885792b);
         
 </script>{% block content %}{% endblock %}

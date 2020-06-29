@@ -4,6 +4,9 @@ import folium
 from bs4 import BeautifulSoup
 import math
 from socket import *
+from folium.plugins import Draw
+import json
+
 
 
 # добавление block и endblock элементов в html с картой
@@ -25,7 +28,12 @@ def block():
 
 # отчистка от маркеров
 def map():
+    obj = f'data.geojson'
     mappy = folium.Map(width=950, height=950, location=[59.939095, 30.315856], zoom_start=11)  # карта
+    draw = Draw(export=True)
+    folium.GeoJson(obj,name=obj).add_to(mappy)
+    mappy.add_child(draw)
+    folium.LayerControl().add_to(mappy)
     mappy.save('templates/map1.html')
     block()
     return mappy
@@ -139,8 +147,32 @@ def getValue(request):
         return render(request, 'base.html')
 
 
+def export(request):
+    response = str(request.POST)
+    new = response[:len(response)-9]
+    newnew = new[14:]
+    with open('data.geojson', 'w') as outfile:
+        outfile.write(newnew)
+    print(newnew)
+    return render(request, 'base.html')
+
+
+# {% if this.export %}
+#             document.getElementById('export').onclick = function(e) {
+#                 var data = drawnItems.toGeoJSON();
+#                 var convertedData = 'text/json;charset=utf-8,'
+#                     + encodeURIComponent(JSON.stringify(data));
+#                  $.ajax({
+#                     type: "POST",
+#                     url: "http://127.0.0.1:8000/export",
+#                     dataType: 'json',
+#                     data: JSON.stringify(data)
+#                 });
+#             }
+
+
 def getLastFromDb():
-    #подключение к дб
+    # подключение к дб
     con = psycopg2.connect(
         database="django_db",
         user="user_name",
@@ -159,14 +191,14 @@ def run(request):
         addr = ('localhost', 7777)
         tcp_socket = socket(AF_INET, SOCK_STREAM)
         tcp_socket.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
-    # bind - связывает адрес и порт с сокетом
+        # bind - связывает адрес и порт с сокетом
         tcp_socket.bind(addr)
-    # listen - запускает прием TCP
+        # listen - запускает прием TCP
         tcp_socket.listen(1)
-    # Бесконечный цикл работы программы
+        # Бесконечный цикл работы программы
         while True:
 
-            #кидаем последнюю запись
+            # кидаем последнюю запись
             conn, addr = tcp_socket.accept()
             print('client addr: ', addr)
             try:
@@ -179,4 +211,4 @@ def run(request):
             except TypeError:
                 return render(request, 'base.html')
     except OSError:
-       return render(request, 'base.html')
+        return render(request, 'base.html')
